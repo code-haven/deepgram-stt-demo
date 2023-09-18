@@ -4,9 +4,10 @@
        <title>Live Transcription</title>
    </head>
    <body>
-        <h1>Transcribe Audio With Flask 2.0</h1>
+        <h1>Deepgram - Demo</h1>
+        <p>The following actions have been implemented: "comma", "period", "semicolon", "question mark", "colon", "next line", "next point"</p>
         <p id="status">Connection status will go here</p>
-        <p id="transcript"></p>
+        <textarea id="transcript" rows="10" cols="100"></textarea>
 
         <script>
             navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -18,6 +19,23 @@
             })
 
             const socket = new WebSocket('ws://localhost:5555/listen')
+
+            const postprocess = (message) => {
+                let replacements = [
+                ["comma", ","],
+                ["period", "."],
+                ["semicolon", ";"],
+                ["question mark", "?"],
+                ["colon", ":"],
+                ["next line", "\r\n"],
+                ["next point", "\r\n*"],
+                ]
+                for (replacement of replacements) {
+                    message = message.replaceAll(replacement[0], replacement[1]);
+                }
+                
+                return message;
+            }
 
             socket.onopen = () => {
                 document.querySelector('#status').textContent = 'Connected'
@@ -32,18 +50,10 @@
             socket.onmessage = (message) => {
                 const received = message.data
                 if (received) {
-                    document.querySelector('#transcript').textContent +=  ' ' + message.data
-                  
-
+                    document.querySelector('#transcript').textContent +=  ' ' + postprocess(message.data);
                 }
-
            }
-
            })
-          
-
-
-        
         </script>
    
    </body>

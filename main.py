@@ -8,7 +8,6 @@ from aiohttp_wsgi import WSGIHandler
 
 from typing import Dict, Callable
 
-
 load_dotenv()
 
 app = Flask('aioflask')
@@ -29,7 +28,9 @@ async def process_audio(fast_socket: web.WebSocketResponse):
 
 async def connect_to_deepgram(transcript_received_handler: Callable[[Dict], None]) -> str:
     try:
-        socket = await dg_client.transcription.live({'punctuate': True, 'interim_results': False})
+        socket = await dg_client.transcription.live(
+            {'interim_results': False, 'language': 'en-US', 'model': 'phonecall', 'tier': 'nova'}
+            )
         socket.registerHandler(socket.event.CLOSE, lambda c: print(f'Connection closed with code {c}.'))
         socket.registerHandler(socket.event.TRANSCRIPT_RECEIVED, transcript_received_handler)
 
